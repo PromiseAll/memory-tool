@@ -3,7 +3,6 @@ const { MemoryTool } = require('./');
 const CONFIG = {
   PROCESS_NAME: 'PlantsVsZombies.exe',
   MODULE_NAME: 'PlantsVsZombies.exe',
-  // 使用修正后的标准偏移 (示例)
   OFFSETS: [0xfa428, 0x18, 0x34, 0x1c, 0x5560],
   ARCH_IS_X64: false,
 };
