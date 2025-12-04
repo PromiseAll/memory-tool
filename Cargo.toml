@@ -1,0 +1,31 @@
+[package]
+name = "memory_tool"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# 使用官方 windows crate
+windows = { version = "0.62.2", features = [
+  "Win32_Foundation",
+  "Win32_System_Threading",
+  "Win32_System_Diagnostics_Debug",    # 读写内存
+  "Win32_System_Diagnostics_ToolHelp", # 找进程模块
+  "Win32_System_Memory",               # 修改内存保护
+  "Win32_Security",                    # 提权相关
+  "Win32_Security_Authorization",      # 提权相关
+  "Win32_System_SystemServices",       # 提权相关
+] }
+
+napi = { version = "3.6.1", features = ["tokio_rt", "napi6"] }
+napi-derive = "3.4.0"
+# tokio = { version = "1.48", features = ["rt-multi-thread"] }
+
+[profile.release]
+codegen-units = 1 # 允许 LLVM 执行更好的优化。
+lto = true        # 启用链接时优化。
+opt-level = "s"   # 优先考虑小的二进制文件大小。如果您更喜欢速度，请使用 `3`。
+panic = "abort"   # 通过禁用 panic 处理程序来提高性能。
+strip = true      # 确保移除调试符号。

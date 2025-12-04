@@ -1,0 +1,55 @@
+{
+  "name": "memory-tool",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "description": "基于Windows平台内存操作库，支持读写进程内存、解析指针链等功能",
+  "keywords": [
+    "rust",
+    "memory",
+    "process",
+    "napi",
+    "addon",
+    "windows",
+    "memory-tool",
+    "debug",
+    "hacking"
+  ],
+  "author": "PromiseAll",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PromiseAll/memory-tool.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PromiseAll/memory-tool/issues"
+  },
+  "homepage": "https://github.com/PromiseAll/memory-tool#readme",
+  "scripts": {
+    "build": "napi build --platform --release -o dist",
+    "dev": "cargo build",
+    "test": "node test.js",
+    "clean": "cargo clean",
+    "lint": "rustfmt --check src/**/*.rs",
+    "format": "rustfmt src/**/*.rs"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "x86"
+  ],
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  },
+  "gypfile": true
+}
