@@ -33,7 +33,7 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Setup Rust
-        uses: dtolnay/rust-action@stable
+        uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
 
@@ -54,6 +54,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 需要完整历史生成 changelog
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -73,6 +75,15 @@ jobs:
           path: dist
           merge-multiple: true
 
+      - name: Generate changelog
+        id: changelog
+        uses: orhun/git-cliff-action@v3
+        with:
+          config: cliff.toml
+          args: --latest --strip header
+        env:
+          OUTPUT: CHANGELOG.md
+
       - name: List files
         run: ls -la dist/
 
@@ -85,4 +96,5 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: dist/*.node
-          generate_release_notes: true
+          body: ${{ steps.changelog.outputs.content }}
+          generate_release_notes: false
