@@ -52,7 +52,7 @@
     "LICENSE"
   ],
   "devDependencies": {
-    "@napi-rs/cli": "^2.18.4",
+    "@napi-rs/cli": "3.5.0",
     "rimraf": "^5.0.5"
   },
   "packageManager": "pnpm@9.0.0"
