@@ -55,15 +55,16 @@ pub fn find_process_id(name: &str) -> Option<u32> {
         None
     };
 
-    unsafe { let _ = CloseHandle(snapshot); }
+    unsafe {
+        let _ = CloseHandle(snapshot);
+    }
     result
 }
 
 /// 根据进程ID和模块名查找模块地址信息
 pub fn find_module_info(pid: u32, mod_name: &str) -> Option<ModuleAddressInfo> {
-    let snapshot = unsafe {
-        CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid).ok()?
-    };
+    let snapshot =
+        unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid).ok()? };
     let mut entry = MODULEENTRY32 {
         dwSize: size_of::<MODULEENTRY32>() as u32,
         ..Default::default()
@@ -89,7 +90,9 @@ pub fn find_module_info(pid: u32, mod_name: &str) -> Option<ModuleAddressInfo> {
         None
     };
 
-    unsafe { let _ = CloseHandle(snapshot); }
+    unsafe {
+        let _ = CloseHandle(snapshot);
+    }
     result
 }
 
@@ -127,12 +130,11 @@ pub fn get_all_processes() -> Vec<ProcessInfo> {
 
 /// 获取指定进程的所有模块（修复：返回正确的 ModuleInfo）
 pub fn get_process_modules(pid: u32) -> Vec<ModuleInfo> {
-    let snapshot = match unsafe {
-        CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid)
-    } {
-        Ok(h) => h,
-        Err(_) => return Vec::new(),
-    };
+    let snapshot =
+        match unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid) } {
+            Ok(h) => h,
+            Err(_) => return Vec::new(),
+        };
 
     let mut entry = MODULEENTRY32 {
         dwSize: size_of::<MODULEENTRY32>() as u32,
@@ -166,15 +168,17 @@ pub fn get_process_modules(pid: u32) -> Vec<ModuleInfo> {
 /// 检测目标进程是否为64位
 #[cfg(target_pointer_width = "64")]
 pub fn is_process_x64(pid: u32) -> Option<bool> {
-    use windows::core::BOOL;
     use windows::Win32::System::Threading::{
         IsWow64Process, OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION,
     };
+    use windows::core::BOOL;
 
     let handle = unsafe { OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid).ok()? };
     let mut is_wow64 = BOOL::default();
     let result = unsafe { IsWow64Process(handle, &mut is_wow64) };
-    unsafe { let _ = CloseHandle(handle); }
+    unsafe {
+        let _ = CloseHandle(handle);
+    }
 
     if result.is_ok() {
         // WoW64 = 32位进程运行在64位系统上

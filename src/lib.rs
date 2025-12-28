@@ -70,11 +70,17 @@ impl MemoryTool {
             PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION | PROCESS_QUERY_INFORMATION;
 
         let handle = unsafe {
-            OpenProcess(access_flags, false, pid)
-                .map_err(|e| Error::new(Status::GenericFailure, format!("OpenProcess 失败: {}", e)))?
+            OpenProcess(access_flags, false, pid).map_err(|e| {
+                Error::new(Status::GenericFailure, format!("OpenProcess 失败: {}", e))
+            })?
         };
 
-        Ok(MemoryTool { handle, pid, arch, debug })
+        Ok(MemoryTool {
+            handle,
+            pid,
+            arch,
+            debug,
+        })
     }
 }
 
@@ -161,7 +167,11 @@ impl MemoryTool {
 
     /// 通过 PID 创建（手动指定架构）
     #[napi]
-    pub fn create_from_pid_with_arch(pid: u32, arch_is_x64: bool, debug_mode: Option<bool>) -> Result<Self> {
+    pub fn create_from_pid_with_arch(
+        pid: u32,
+        arch_is_x64: bool,
+        debug_mode: Option<bool>,
+    ) -> Result<Self> {
         Self::create(CreateOptions {
             process_name: None,
             pid: Some(pid),
@@ -186,11 +196,17 @@ impl MemoryTool {
     #[napi]
     pub fn get_module(&self, module_name: String) -> Result<ModuleInfo> {
         let info = find_module_info(self.pid, &module_name).ok_or_else(|| {
-            Error::new(Status::GenericFailure, format!("模块未找到: {}", module_name))
+            Error::new(
+                Status::GenericFailure,
+                format!("模块未找到: {}", module_name),
+            )
         })?;
 
         if self.debug {
-            println!("[DEBUG] {} 地址: {:#X} - {:#X}", module_name, info.start_address, info.end_address);
+            println!(
+                "[DEBUG] {} 地址: {:#X} - {:#X}",
+                module_name, info.start_address, info.end_address
+            );
         }
 
         Ok(ModuleInfo {
@@ -205,7 +221,10 @@ impl MemoryTool {
     #[napi]
     pub fn get_module_start_address(&self, module_name: String) -> Result<BigInt> {
         let info = find_module_info(self.pid, &module_name).ok_or_else(|| {
-            Error::new(Status::GenericFailure, format!("模块未找到: {}", module_name))
+            Error::new(
+                Status::GenericFailure,
+                format!("模块未找到: {}", module_name),
+            )
         })?;
         Ok(BigInt::from(info.start_address as u64))
     }
@@ -214,7 +233,10 @@ impl MemoryTool {
     #[napi]
     pub fn get_module_end_address(&self, module_name: String) -> Result<BigInt> {
         let info = find_module_info(self.pid, &module_name).ok_or_else(|| {
-            Error::new(Status::GenericFailure, format!("模块未找到: {}", module_name))
+            Error::new(
+                Status::GenericFailure,
+                format!("模块未找到: {}", module_name),
+            )
         })?;
         Ok(BigInt::from(info.end_address as u64))
     }
@@ -394,7 +416,7 @@ impl MemoryTool {
         let len = length.unwrap_or(16);
         let buffer = self.read_buffer(addr, len)?;
         let bytes: &[u8] = &buffer;
-        
+
         // 返回十六进制格式，便于分析
         let hex: Vec<String> = bytes.iter().map(|b| format!("{:02X}", b)).collect();
         Ok(hex.join(" "))
@@ -404,8 +426,11 @@ impl MemoryTool {
     #[napi]
     pub fn write_instruction(&self, addr: BigInt, hex_bytes: String) -> Result<()> {
         // 解析十六进制字符串，支持 "90 90 90" 或 "909090" 格式
-        let cleaned: String = hex_bytes.chars().filter(|c| c.is_ascii_hexdigit()).collect();
-        
+        let cleaned: String = hex_bytes
+            .chars()
+            .filter(|c| c.is_ascii_hexdigit())
+            .collect();
+
         if cleaned.len() % 2 != 0 {
             return Err(Error::new(Status::InvalidArg, "无效的十六进制字符串"));
         }
